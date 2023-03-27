@@ -81,7 +81,7 @@ onMounted((myMap) => {
             <input type="text"
               class="flex-1 rounded-tl-md rounded-bl-md px-2 py-3 focus-within:outline-none placeholder:text-dark-gray"
               placeholder="search for any IP address or domain" v-model="ipAddress">
-            <button @click="getIpInfo">
+            <button @click="">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor"
                 class="text-white bg-black px-4 py-2 rounded-br-md rounded-tr-md felex items-center h-12 w-12">
