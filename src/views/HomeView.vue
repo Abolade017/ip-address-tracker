@@ -4,14 +4,47 @@ import IpInfo from '../components/IpInfo.vue'
 // @ts-ignore
 import leaflet from 'leaflet'
 import axios from 'axios';
-
+interface IpInfo {
+  address: string,
+  state: string,
+  timeZone: string,
+  isp: string,
+  lat: number,
+  lng: number
+};
 let myMap: any;
-const ipAddress = ref<string>("")
-const ipInfo = ref<null>(null)
+const queryIp = ref<string>("")
+const ipInfo = ref<IpInfo>()
 const api_key = ref<string>('at_UJxbjQQ8KiMaf9MPkByoA8YD6ZzQZ')
+async function getIpInfo(event: Event) {
+  try {
+    await axios
+      .get(`https://geo.ipify.org/api/v2/country,city?apiKey=at_UJxbjQQ8KiMaf9MPkByoA8YD6ZzQZ&ipAddress=${queryIp.value}`)
+      .then(function (response) {
+        const result = response.data;
+        console.log(result)
+        ipInfo.value =
+        {
+          address: result.ip,
+          state: result.location.region,
+          timeZone: result.location.timezone,
+          isp: result.isp,
+          lat: result.location.lat,
+          lng: result.location.lng
+        }
+        leaflet.marker([ipInfo.value.lat, ipInfo.value.lng]).addTo(myMap)
+        myMap.setView([ipInfo.value.lat, ipInfo.value.lng], 13)
+
+      })
+  }
+  catch (error) {
+    alert(error)
+  }
+}
+
 // @ts-ignore
-onMounted((myMap) => {
-  myMap = leaflet.map('map').setView([51.505, -0.09], 13);
+onMounted(() => {
+  myMap = leaflet.map('map').setView([51.505, -0.09], 9);
   leaflet
     .tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -30,43 +63,9 @@ onMounted((myMap) => {
     [51.503, -0.06],
     [51.51, -0.047]
   ]).addTo(myMap);
-  
-  async function  getIpInfo(event:Event){
-    try {
-      await axios
-        .get(`https://geo.ipify.org/api/v2/country,city?apiKey=${api_key}&ipAddress=${ipAddress.value}`)
-        .then(({ data }) => {
-          const result = data.data;
-          console.log(result)
-          interface IpInfo {
-            address: string,
-            state: string,
-            timeZone: string,
-            isp: string,
-            lat: number,
-            lng: number
-          }
-          const ipInfo: IpInfo =
-          {
-            address: result.ip,
-            state: result.location.region,
-            timeZone: result.location.timeZone,
-            isp: result.isp,
-            lat: result.location.lat,
-            lng: result.location.lng
-          }
-          leaflet.marker([ipInfo.lat, ipInfo.lng]).addTo(myMap)
-          myMap.setView([ipInfo.lat, ipInfo.lng], 13)
-
-        })
-    }
-    catch (error) {
-      alert(error)
-    }
-  }
-
-  return { ipAddress, ipInfo, getIpInfo }
+  return { queryIp, getIpInfo, ipInfo }
 })
+
 </script>
 
 <template>
@@ -80,20 +79,20 @@ onMounted((myMap) => {
           <div class="flex">
             <input type="text"
               class="flex-1 rounded-tl-md rounded-bl-md px-2 py-3 focus-within:outline-none placeholder:text-dark-gray"
-              placeholder="search for any IP address or domain" v-model="ipAddress">
-            <button @click="">
+              placeholder="search for any IP address or domain" v-model="queryIp">
+            <button @click="getIpInfo">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor"
                 class="text-white bg-black px-4 py-2 rounded-br-md rounded-tr-md felex items-center h-12 w-12">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </button>
-            <p>{{ ipAddress }}</p>
+            <!-- <p>{{ queryIp }}</p> -->
           </div>
           <!-- <div>{{ ipAddress }}</div> -->
         </div>
         <!-- IP info -->
-        <IpInfo v-if="ipInfo" :info="ipInfo"/>
+        <IpInfo v-if="ipInfo" :ipInfo="ipInfo" />
 
       </div>
       <div id="map" class="z-10 h-full">
