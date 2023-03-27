@@ -1,12 +1,26 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import axios from 'axios'
+import leaflet from '../../node_modules/leaflet/dist/leaflet.css';
 
-export const useCounterStore = defineStore('counter', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
 
-  return { count, doubleCount, increment }
+interface State {
+  map: MapInfo[]
+}
+
+export const useUserStore = defineStore('user', {
+  state: (): State => {
+    return {
+      map: [],
+    }
+  },
 })
+
+interface MapInfo {
+  address: string
+  state: number
+  timeZone: string
+  isp: string,
+  lat: string,
+  lng: string
+}
